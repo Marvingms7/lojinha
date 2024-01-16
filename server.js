@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
+
 const authRoutes = require('./backend/routes/authRoutes');
 const vendedorRoutes = require('./backend/routes/vendedorRoutes');
 const clienteRoutes = require('./backend/routes/clienteRoutes');
@@ -21,12 +23,21 @@ mongoose.connect(process.env.DB_CONNECTION_STRING, { useNewUrlParser: true, useU
 
 const jwtSecret = process.env.JWT_SECRET;
 
+// Adicione isto antes de suas rotas
+app.use(express.static(path.join(__dirname, 'build')));
+
+// Suas rotas existentes
 app.use('/auth', authRoutes);
 app.use('/vendedores', vendedorRoutes);
 app.use('/clientes', clienteRoutes);
 app.use('/marcas', marcaRoutes);
 app.use('/modelos', modeloRoutes);
 app.use('/vendas', vendaRoutes);
+
+// Rota para servir o aplicativo React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
